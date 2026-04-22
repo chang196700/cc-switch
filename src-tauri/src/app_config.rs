@@ -29,6 +29,7 @@ impl McpApps {
             AppType::OpenCode => self.opencode,
             AppType::OpenClaw => false, // OpenClaw doesn't support MCP
             AppType::Hermes => self.hermes,
+            AppType::Copilot => false,  // Copilot CLI doesn't support MCP
         }
     }
 
@@ -41,6 +42,7 @@ impl McpApps {
             AppType::OpenCode => self.opencode = enabled,
             AppType::OpenClaw => {} // OpenClaw doesn't support MCP, ignore
             AppType::Hermes => self.hermes = enabled,
+            AppType::Copilot => {} // Copilot CLI doesn't support MCP, ignore
         }
     }
 
@@ -96,6 +98,7 @@ impl SkillApps {
             AppType::OpenCode => self.opencode,
             AppType::Hermes => self.hermes,
             AppType::OpenClaw => false, // OpenClaw doesn't support Skills
+            AppType::Copilot => false,  // Copilot CLI doesn't support Skills
         }
     }
 
@@ -108,6 +111,7 @@ impl SkillApps {
             AppType::OpenCode => self.opencode = enabled,
             AppType::Hermes => self.hermes = enabled,
             AppType::OpenClaw => {} // OpenClaw doesn't support Skills, ignore
+            AppType::Copilot => {} // Copilot CLI doesn't support Skills, ignore
         }
     }
 
@@ -268,6 +272,9 @@ pub struct McpRoot {
     /// Hermes MCP 配置（实际使用 config.yaml）
     #[serde(default, skip_serializing_if = "McpConfig::is_empty")]
     pub hermes: McpConfig,
+    /// Copilot CLI MCP 配置（Copilot CLI 不支持 MCP，此字段仅占位）
+    #[serde(default, skip_serializing_if = "McpConfig::is_empty")]
+    pub copilot: McpConfig,
 }
 
 impl Default for McpRoot {
@@ -282,6 +289,7 @@ impl Default for McpRoot {
             opencode: McpConfig::default(),
             openclaw: McpConfig::default(),
             hermes: McpConfig::default(),
+            copilot: McpConfig::default(),
         }
     }
 }
@@ -308,6 +316,8 @@ pub struct PromptRoot {
     pub openclaw: PromptConfig,
     #[serde(default)]
     pub hermes: PromptConfig,
+    #[serde(default)]
+    pub copilot: PromptConfig,
 }
 
 use crate::config::{copy_file, get_app_config_dir, get_app_config_path, write_json_file};
@@ -325,6 +335,7 @@ pub enum AppType {
     OpenCode,
     OpenClaw,
     Hermes,
+    Copilot,
 }
 
 impl AppType {
@@ -336,6 +347,7 @@ impl AppType {
             AppType::OpenCode => "opencode",
             AppType::OpenClaw => "openclaw",
             AppType::Hermes => "hermes",
+            AppType::Copilot => "copilot",
         }
     }
 
@@ -359,6 +371,7 @@ impl AppType {
             AppType::OpenCode,
             AppType::OpenClaw,
             AppType::Hermes,
+            AppType::Copilot,
         ]
         .into_iter()
     }
@@ -376,10 +389,11 @@ impl FromStr for AppType {
             "opencode" => Ok(AppType::OpenCode),
             "openclaw" => Ok(AppType::OpenClaw),
             "hermes" => Ok(AppType::Hermes),
+            "copilot" => Ok(AppType::Copilot),
             other => Err(AppError::localized(
                 "unsupported_app",
-                format!("不支持的应用标识: '{other}'。可选值: claude, codex, gemini, opencode, openclaw, hermes。"),
-                format!("Unsupported app id: '{other}'. Allowed: claude, codex, gemini, opencode, openclaw, hermes."),
+                format!("不支持的应用标识: '{other}'。可选值: claude, codex, gemini, opencode, openclaw, hermes, copilot。"),
+                format!("Unsupported app id: '{other}'. Allowed: claude, codex, gemini, opencode, openclaw, hermes, copilot."),
             )),
         }
     }
@@ -405,6 +419,9 @@ pub struct CommonConfigSnippets {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hermes: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub copilot: Option<String>,
 }
 
 impl CommonConfigSnippets {
@@ -417,6 +434,7 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode.as_ref(),
             AppType::OpenClaw => self.openclaw.as_ref(),
             AppType::Hermes => self.hermes.as_ref(),
+            AppType::Copilot => self.copilot.as_ref(),
         }
     }
 
@@ -429,6 +447,7 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode = snippet,
             AppType::OpenClaw => self.openclaw = snippet,
             AppType::Hermes => self.hermes = snippet,
+            AppType::Copilot => self.copilot = snippet,
         }
     }
 }
@@ -471,6 +490,7 @@ impl Default for MultiAppConfig {
         apps.insert("opencode".to_string(), ProviderManager::default());
         apps.insert("openclaw".to_string(), ProviderManager::default());
         apps.insert("hermes".to_string(), ProviderManager::default());
+        apps.insert("copilot".to_string(), ProviderManager::default());
 
         Self {
             version: 2,
@@ -632,6 +652,7 @@ impl MultiAppConfig {
             AppType::OpenCode => &self.mcp.opencode,
             AppType::OpenClaw => &self.mcp.openclaw,
             AppType::Hermes => &self.mcp.hermes,
+            AppType::Copilot => &self.mcp.copilot, // Copilot CLI doesn't support MCP
         }
     }
 
@@ -644,6 +665,7 @@ impl MultiAppConfig {
             AppType::OpenCode => &mut self.mcp.opencode,
             AppType::OpenClaw => &mut self.mcp.openclaw,
             AppType::Hermes => &mut self.mcp.hermes,
+            AppType::Copilot => &mut self.mcp.copilot, // Copilot CLI doesn't support MCP
         }
     }
 
@@ -768,6 +790,7 @@ impl MultiAppConfig {
             AppType::OpenCode => &mut config.prompts.opencode.prompts,
             AppType::OpenClaw => &mut config.prompts.openclaw.prompts,
             AppType::Hermes => &mut config.prompts.hermes.prompts,
+            AppType::Copilot => &mut config.prompts.copilot.prompts,
         };
 
         prompts.insert(id, prompt);
@@ -809,6 +832,7 @@ impl MultiAppConfig {
                 AppType::OpenCode => &self.mcp.opencode.servers,
                 AppType::OpenClaw => continue, // OpenClaw MCP is still in development, skip
                 AppType::Hermes => continue,   // Hermes didn't exist in v3.6.x, skip
+                AppType::Copilot => continue,  // Copilot CLI doesn't support MCP, skip
             };
 
             for (id, entry) in old_servers {

@@ -188,6 +188,7 @@ function App() {
     opencode: true,
     openclaw: true,
     hermes: true,
+    copilot: true,
   };
 
   const getFirstVisibleApp = (): AppId => {

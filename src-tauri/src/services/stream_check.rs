@@ -277,6 +277,12 @@ impl StreamCheckService {
                 // Already handled via early dispatch above
                 unreachable!("OpenCode/OpenClaw/Hermes 已通过 check_once_without_adapter 处理")
             }
+            AppType::Copilot => {
+                // Copilot CLI BYOK is configured via env vars; stream check is not supported
+                Err(AppError::Message(
+                    "Copilot CLI does not support stream check".to_string(),
+                ))
+            }
         };
 
         let response_time = start.elapsed().as_millis() as u64;
@@ -1364,6 +1370,16 @@ impl StreamCheckService {
                 // OpenClaw/Hermes use models array in settings_config
                 // Try to extract first model from the models array
                 Self::extract_openclaw_model(provider).unwrap_or_else(|| "gpt-4o".to_string())
+            }
+            AppType::Copilot => {
+                // Copilot CLI model from env vars
+                provider
+                    .settings_config
+                    .get("env")
+                    .and_then(|e| e.get("COPILOT_MODEL"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("gpt-4o")
+                    .to_string()
             }
         }
     }

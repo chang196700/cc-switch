@@ -664,7 +664,33 @@
     "gemini": "Gemini",
     "opencode": "OpenCode",
     "openclaw": "OpenClaw",
-    "hermes": "Hermes"
+    "hermes": "Hermes",
+    "copilot": "Copilot"
+  },
+  "copilotCli": {
+    "preset": {
+      "official": "GitHub Copilot (Official)",
+      "anthropic": "Anthropic (Claude)",
+      "openai": "OpenAI",
+      "azure": "Azure OpenAI",
+      "ollama": "Ollama (Local)",
+      "aicodemirror": "AICodeMirror (Third-party)",
+      "custom": "Custom Endpoint"
+    },
+    "officialModeNotice": "Official mode: COPILOT_PROVIDER_BASE_URL is not set. Copilot CLI will use the default GitHub Copilot OAuth authentication — no BYOK configuration needed.",
+    "ccopilotHint": "After applying, use the ccopilot command instead of copilot (script generated at ~/.cc-switch/ccopilot). Add ~/.cc-switch to PATH for global access.",
+    "baseUrl": "API Endpoint (Base URL)",
+    "baseUrlHint": "Set COPILOT_PROVIDER_BASE_URL to enable BYOK mode; leave empty to use official GitHub OAuth",
+    "providerType": "Provider Type",
+    "apiKey": "API Key",
+    "model": "Model Name (COPILOT_MODEL)",
+    "azureApiVersion": "Azure API Version",
+    "wireModel": "Wire Model (optional, model name sent to provider)",
+    "wireApi": "Wire API (optional)",
+    "maxPromptTokens": "Max Prompt Tokens (COPILOT_PROVIDER_MAX_PROMPT_TOKENS)",
+    "maxPromptTokensHint": "Specify manually when model is not in the built-in catalog to avoid using defaults (e.g. claude-sonnet-4-6 and other new models)",
+    "maxOutputTokens": "Max Output Tokens (COPILOT_PROVIDER_MAX_OUTPUT_TOKENS)",
+    "optional": "Optional"
   },
   "sessionManager": {
     "title": "Session Manager",

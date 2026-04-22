@@ -110,6 +110,13 @@ pub async fn get_config_status(app: String) -> Result<ConfigStatus, String> {
 
             Ok(ConfigStatus { exists, path })
         }
+        AppType::Copilot => {
+            // Copilot CLI is configured via env vars, no config file
+            Ok(ConfigStatus {
+                exists: false,
+                path: String::new(),
+            })
+        }
     }
 }
 
@@ -127,6 +134,7 @@ pub async fn get_config_dir(app: String) -> Result<String, String> {
         AppType::OpenCode => crate::opencode_config::get_opencode_dir(),
         AppType::OpenClaw => crate::openclaw_config::get_openclaw_dir(),
         AppType::Hermes => crate::hermes_config::get_hermes_dir(),
+        AppType::Copilot => crate::config::get_home_dir(), // Copilot CLI has no config dir
     };
 
     Ok(dir.to_string_lossy().to_string())
@@ -141,6 +149,7 @@ pub async fn open_config_folder(handle: AppHandle, app: String) -> Result<bool, 
         AppType::OpenCode => crate::opencode_config::get_opencode_dir(),
         AppType::OpenClaw => crate::openclaw_config::get_openclaw_dir(),
         AppType::Hermes => crate::hermes_config::get_hermes_dir(),
+        AppType::Copilot => crate::config::get_home_dir(), // Copilot CLI has no config dir
     };
 
     if !config_dir.exists() {

@@ -41,6 +41,16 @@ import {
   hermesProviderPresets,
   type HermesProviderPreset,
 } from "@/config/hermesProviderPresets";
+import {
+  copilotCliProviderPresets,
+  type CopilotCliProviderPreset,
+} from "@/config/copilotCliProviderPresets";
+import {
+  CopilotCliFormFields,
+  parseCopilotConfig,
+  serializeCopilotConfig,
+  type CopilotCliEnvConfig,
+} from "./CopilotCliFormFields";
 import { OpenCodeFormFields } from "./OpenCodeFormFields";
 import { OpenClawFormFields } from "./OpenClawFormFields";
 import { HermesFormFields } from "./HermesFormFields";
@@ -97,6 +107,7 @@ import {
   GEMINI_DEFAULT_CONFIG,
   OPENCODE_DEFAULT_CONFIG,
   OPENCLAW_DEFAULT_CONFIG,
+  COPILOT_DEFAULT_CONFIG,
   normalizePricingSource,
 } from "./helpers/opencodeFormUtils";
 import { HERMES_DEFAULT_CONFIG } from "./hooks/useHermesFormState";
@@ -112,7 +123,8 @@ type PresetEntry = {
     | GeminiProviderPreset
     | OpenCodeProviderPreset
     | OpenClawProviderPreset
-    | HermesProviderPreset;
+    | HermesProviderPreset
+    | CopilotCliProviderPreset;
 };
 
 interface ProviderFormProps {
@@ -264,6 +276,8 @@ export function ProviderForm({
                 ? OPENCLAW_DEFAULT_CONFIG
                 : appId === "hermes"
                   ? HERMES_DEFAULT_CONFIG
+                  : appId === "copilot"
+                    ? COPILOT_DEFAULT_CONFIG
                   : CLAUDE_DEFAULT_CONFIG,
       icon: initialData?.icon ?? "",
       iconColor: initialData?.iconColor ?? "",
@@ -409,6 +423,22 @@ export function ProviderForm({
     [originalHandleCodexConfigChange, debouncedValidate],
   );
 
+  // Copilot CLI env var config state
+  const [copilotConfig, setCopilotConfig] = useState<CopilotCliEnvConfig>(() =>
+    parseCopilotConfig(
+      initialData?.settingsConfig
+        ? JSON.stringify(initialData.settingsConfig)
+        : COPILOT_DEFAULT_CONFIG,
+    ),
+  );
+
+  const handleCopilotConfigChange = useCallback(
+    (config: CopilotCliEnvConfig) => {
+      setCopilotConfig(config);
+    },
+    [],
+  );
+
   useEffect(() => {
     if (appId === "codex" && !initialData && selectedPresetId === "custom") {
       const template = getCodexCustomTemplate();
@@ -463,6 +493,11 @@ export function ProviderForm({
     } else if (appId === "hermes") {
       return hermesProviderPresets.map<PresetEntry>((preset, index) => ({
         id: `hermes-${index}`,
+        preset,
+      }));
+    } else if (appId === "copilot") {
+      return copilotCliProviderPresets.map<PresetEntry>((preset, index) => ({
+        id: `copilot-${index}`,
         preset,
       }));
     }
@@ -1022,6 +1057,8 @@ export function ProviderForm({
         }
       }
       settingsConfig = JSON.stringify(omoConfig);
+    } else if (appId === "copilot") {
+      settingsConfig = serializeCopilotConfig(copilotConfig);
     } else {
       settingsConfig = values.settingsConfig.trim();
     }
@@ -1307,6 +1344,10 @@ export function ProviderForm({
       if (appId === "hermes") {
         hermesForm.resetHermesState();
       }
+      // Copilot CLI 自定义模式：重置为空配置
+      if (appId === "copilot") {
+        setCopilotConfig(parseCopilotConfig(COPILOT_DEFAULT_CONFIG));
+      }
       return;
     }
 
@@ -1417,6 +1458,14 @@ export function ProviderForm({
       const config = preset.settingsConfig;
 
       hermesForm.resetHermesState(config);
+    }
+
+    // Copilot CLI preset handling
+    if (appId === "copilot") {
+      const preset = entry.preset as CopilotCliProviderPreset;
+      const config = preset.settingsConfig;
+
+      setCopilotConfig(parseCopilotConfig(JSON.stringify(config)));
 
       form.reset({
         name: preset.nameKey ? t(preset.nameKey) : preset.name,
@@ -1909,6 +1958,14 @@ export function ProviderForm({
             />
           )}
 
+          {/* Copilot CLI 专属字段 */}
+          {appId === "copilot" && (
+            <CopilotCliFormFields
+              config={copilotConfig}
+              onChange={handleCopilotConfigChange}
+            />
+          )}
+
           {/* 配置编辑器：Codex、Claude、Gemini 分别使用不同的编辑器 */}
           {appId === "codex" ? (
             <>
@@ -2030,7 +2087,7 @@ export function ProviderForm({
                 )}
               />
             </>
-          ) : (
+          ) : appId === "copilot" ? null : (
             <>
               <CommonConfigEditor
                 value={form.getValues("settingsConfig")}
@@ -2053,7 +2110,8 @@ export function ProviderForm({
           {!isAnyOmoCategory &&
             appId !== "opencode" &&
             appId !== "openclaw" &&
-            appId !== "hermes" && (
+            appId !== "hermes" &&
+            appId !== "copilot" && (
               <ProviderAdvancedConfig
                 testConfig={testConfig}
                 pricingConfig={pricingConfig}

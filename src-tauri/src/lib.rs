@@ -6,6 +6,7 @@ mod claude_plugin;
 mod codex_config;
 mod commands;
 mod config;
+mod copilot_cli_config;
 mod database;
 mod deeplink;
 mod error;

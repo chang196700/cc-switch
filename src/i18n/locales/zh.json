@@ -664,7 +664,33 @@
     "gemini": "Gemini",
     "opencode": "OpenCode",
     "openclaw": "OpenClaw",
-    "hermes": "Hermes"
+    "hermes": "Hermes",
+    "copilot": "Copilot"
+  },
+  "copilotCli": {
+    "preset": {
+      "official": "GitHub Copilot（官方）",
+      "anthropic": "Anthropic (Claude)",
+      "openai": "OpenAI",
+      "azure": "Azure OpenAI",
+      "ollama": "Ollama（本地）",
+      "aicodemirror": "AICodeMirror（第三方）",
+      "custom": "自定义端点"
+    },
+    "officialModeNotice": "当前为官方模式：未设置 COPILOT_PROVIDER_BASE_URL，Copilot CLI 将使用默认的 GitHub Copilot OAuth 认证，无需填写 BYOK 配置。",
+    "ccopilotHint": "应用后请使用 ccopilot 命令代替 copilot（脚本已生成至 ~/.cc-switch/ccopilot）。将 ~/.cc-switch 加入 PATH 即可全局使用。",
+    "baseUrl": "API 端点（Base URL）",
+    "baseUrlHint": "设置 COPILOT_PROVIDER_BASE_URL 以激活 BYOK 模式；留空则使用官方 GitHub OAuth",
+    "providerType": "供应商类型",
+    "apiKey": "API Key",
+    "model": "模型名称（COPILOT_MODEL）",
+    "azureApiVersion": "Azure API 版本",
+    "wireModel": "Wire Model（可选，发送给 Provider 的模型名）",
+    "wireApi": "Wire API（可选）",
+    "maxPromptTokens": "最大提示词 Token 数（COPILOT_PROVIDER_MAX_PROMPT_TOKENS）",
+    "maxPromptTokensHint": "模型不在内置目录时可手动指定，避免使用默认值（如 claude-sonnet-4-6 等新模型）",
+    "maxOutputTokens": "最大输出 Token 数（COPILOT_PROVIDER_MAX_OUTPUT_TOKENS）",
+    "optional": "可选"
   },
   "sessionManager": {
     "title": "会话管理",

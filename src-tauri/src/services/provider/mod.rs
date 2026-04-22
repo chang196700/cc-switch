@@ -1734,6 +1734,7 @@ impl ProviderService {
             AppType::OpenCode => Self::extract_opencode_common_config(&provider.settings_config),
             AppType::OpenClaw => Self::extract_openclaw_common_config(&provider.settings_config),
             AppType::Hermes => Ok(String::new()), // Hermes doesn't use common config snippets
+            AppType::Copilot => Ok(String::new()), // Copilot CLI doesn't support common config
         }
     }
 
@@ -1749,6 +1750,7 @@ impl ProviderService {
             AppType::OpenCode => Self::extract_opencode_common_config(settings_config),
             AppType::OpenClaw => Self::extract_openclaw_common_config(settings_config),
             AppType::Hermes => Ok(String::new()), // Hermes doesn't use common config snippets
+            AppType::Copilot => Ok(String::new()), // Copilot CLI doesn't support common config
         }
     }
 
@@ -2124,6 +2126,16 @@ impl ProviderService {
                     ));
                 }
             }
+            AppType::Copilot => {
+                // Copilot CLI uses env vars; settings_config must be an object
+                if !provider.settings_config.is_object() {
+                    return Err(AppError::localized(
+                        "provider.copilot.settings.not_object",
+                        "Copilot CLI 配置必须是 JSON 对象",
+                        "Copilot CLI configuration must be a JSON object",
+                    ));
+                }
+            }
         }
 
         // Validate and clean UsageScript configuration (common for all app types)
@@ -2313,6 +2325,41 @@ impl ProviderService {
                 let base_url = provider
                     .settings_config
                     .get("baseUrl")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+
+                Ok((api_key, base_url))
+            }
+            AppType::Copilot => {
+                // Copilot CLI stores credentials in env vars
+                let env = provider
+                    .settings_config
+                    .get("env")
+                    .and_then(|v| v.as_object())
+                    .ok_or_else(|| {
+                        AppError::localized(
+                            "provider.copilot.env.missing",
+                            "配置格式错误: 缺少 env",
+                            "Invalid configuration: missing env section",
+                        )
+                    })?;
+
+                let api_key = env
+                    .get("COPILOT_PROVIDER_API_KEY")
+                    .or_else(|| env.get("COPILOT_PROVIDER_BEARER_TOKEN"))
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        AppError::localized(
+                            "provider.copilot.api_key.missing",
+                            "缺少 API Key",
+                            "API key is missing",
+                        )
+                    })?
+                    .to_string();
+
+                let base_url = env
+                    .get("COPILOT_PROVIDER_BASE_URL")
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string();

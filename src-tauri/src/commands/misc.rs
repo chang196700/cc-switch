@@ -807,6 +807,17 @@ fn extract_env_vars_from_config(
         }
     }
 
+    // Copilot CLI: settingsConfig 的顶层字符串字段直接是 env vars
+    if *app_type == AppType::Copilot {
+        for (key, value) in obj {
+            if let Some(str_val) = value.as_str() {
+                if !str_val.is_empty() {
+                    env_vars.push((key.clone(), str_val.to_string()));
+                }
+            }
+        }
+    }
+
     env_vars
 }
 

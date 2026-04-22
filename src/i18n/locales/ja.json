@@ -664,7 +664,33 @@
     "gemini": "Gemini",
     "opencode": "OpenCode",
     "openclaw": "OpenClaw",
-    "hermes": "Hermes"
+    "hermes": "Hermes",
+    "copilot": "Copilot"
+  },
+  "copilotCli": {
+    "preset": {
+      "official": "GitHub Copilot（公式）",
+      "anthropic": "Anthropic (Claude)",
+      "openai": "OpenAI",
+      "azure": "Azure OpenAI",
+      "ollama": "Ollama（ローカル）",
+      "aicodemirror": "AICodeMirror（サードパーティ）",
+      "custom": "カスタムエンドポイント"
+    },
+    "officialModeNotice": "公式モード：COPILOT_PROVIDER_BASE_URL が未設定です。Copilot CLI はデフォルトの GitHub Copilot OAuth 認証を使用します。BYOK 設定は不要です。",
+    "ccopilotHint": "適用後は copilot の代わりに ccopilot コマンドを使用してください（スクリプトは ~/.cc-switch/ccopilot に生成されます）。~/.cc-switch を PATH に追加するとグローバルに使用できます。",
+    "baseUrl": "API エンドポイント（Base URL）",
+    "baseUrlHint": "BYOK モードを有効にするには COPILOT_PROVIDER_BASE_URL を設定してください；空欄の場合は公式 GitHub OAuth を使用",
+    "providerType": "プロバイダーの種類",
+    "apiKey": "API キー",
+    "model": "モデル名（COPILOT_MODEL）",
+    "azureApiVersion": "Azure API バージョン",
+    "wireModel": "Wire Model（任意、プロバイダーに送信するモデル名）",
+    "wireApi": "Wire API（任意）",
+    "maxPromptTokens": "最大プロンプトトークン数（COPILOT_PROVIDER_MAX_PROMPT_TOKENS）",
+    "maxPromptTokensHint": "モデルが内蔵カタログにない場合にデフォルト値の使用を避けるため手動で指定（例：claude-sonnet-4-6 などの新しいモデル）",
+    "maxOutputTokens": "最大出力トークン数（COPILOT_PROVIDER_MAX_OUTPUT_TOKENS）",
+    "optional": "任意"
   },
   "sessionManager": {
     "title": "セッション管理",

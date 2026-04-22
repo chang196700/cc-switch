@@ -52,6 +52,17 @@ export const OPENCLAW_DEFAULT_CONFIG = JSON.stringify(
   2,
 );
 
+export const COPILOT_DEFAULT_CONFIG = JSON.stringify(
+  {
+    COPILOT_PROVIDER_BASE_URL: "",
+    COPILOT_PROVIDER_TYPE: "openai",
+    COPILOT_PROVIDER_API_KEY: "",
+    COPILOT_MODEL: "",
+  },
+  null,
+  2,
+);
+
 // ── Pure functions ───────────────────────────────────────────────────
 
 export function isKnownOpencodeOptionKey(key: string): boolean {

@@ -348,6 +348,7 @@ fn settings_contain_common_config(app_type: &AppType, settings: &Value, snippet:
             _ => false,
         },
         AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => false,
+        AppType::Copilot => false, // Copilot CLI uses env vars, no common config concept
     }
 }
 
@@ -418,6 +419,7 @@ pub(crate) fn remove_common_config_from_settings(
             Ok(result)
         }
         AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => Ok(settings.clone()),
+        AppType::Copilot => Ok(settings.clone()), // Copilot CLI uses env vars, no common config
     }
 }
 
@@ -473,6 +475,7 @@ fn apply_common_config_to_settings(
             Ok(result)
         }
         AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => Ok(settings.clone()),
+        AppType::Copilot => Ok(settings.clone()), // Copilot CLI uses env vars, no common config
     }
 }
 
@@ -796,6 +799,26 @@ pub(crate) fn write_live_snapshot(app_type: &AppType, provider: &Provider) -> Re
             crate::hermes_config::set_provider(&provider.id, provider.settings_config.clone())?;
             log::debug!("Hermes provider '{}' written to live config", provider.id);
         }
+        AppType::Copilot => {
+            // Copilot CLI is configured entirely via environment variables.
+            // Write env var preset files and generate the ccopilot wrapper script.
+            // Users run `ccopilot` instead of `copilot` to get BYOK config.
+            let env_vars = crate::copilot_cli_config::extract_env_vars(&provider.settings_config);
+
+            if let Err(e) = crate::copilot_cli_config::write_copilot_env_scripts(&env_vars) {
+                log::warn!("Failed to write Copilot env scripts: {e}");
+            }
+
+            if let Err(e) = crate::copilot_cli_config::write_ccopilot_wrapper() {
+                log::warn!("Failed to write ccopilot wrapper script: {e}");
+            }
+
+            log::info!(
+                "Copilot CLI provider '{}' applied: {} env vars written, ccopilot wrapper generated",
+                provider.id,
+                env_vars.len()
+            );
+        }
     }
     Ok(())
 }
@@ -1004,6 +1027,19 @@ pub fn read_live_settings(app_type: AppType) -> Result<Value, AppError> {
             let config = crate::hermes_config::yaml_to_json(&yaml_config)?;
             Ok(config)
         }
+        AppType::Copilot => {
+            // Copilot CLI has no persistent config file; return current env vars as JSON
+            let env_vars: serde_json::Map<String, Value> =
+                crate::copilot_cli_config::COPILOT_ALL_ENV_KEYS
+                    .iter()
+                    .filter_map(|k| {
+                        std::env::var(k)
+                            .ok()
+                            .map(|v| (k.to_string(), Value::String(v)))
+                    })
+                    .collect();
+            Ok(Value::Object(env_vars))
+        }
     }
 }
 
@@ -1015,6 +1051,11 @@ pub fn import_default_config(state: &AppState, app_type: AppType) -> Result<bool
     // Additive mode apps (OpenCode, OpenClaw) should use their dedicated
     // import_xxx_providers_from_live functions, not this generic default config import
     if app_type.is_additive_mode() {
+        return Ok(false);
+    }
+
+    // Copilot CLI has no persistent config file; nothing to import
+    if app_type == AppType::Copilot {
         return Ok(false);
     }
 
@@ -1086,9 +1127,9 @@ pub fn import_default_config(state: &AppState, app_type: AppType) -> Result<bool
                 "config": config_obj
             })
         }
-        // OpenCode, OpenClaw and Hermes use additive mode and are handled by early return above
-        AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => {
-            unreachable!("additive mode apps are handled by early return")
+        // OpenCode, OpenClaw, Hermes, and Copilot are handled by early returns above
+        AppType::OpenCode | AppType::OpenClaw | AppType::Hermes | AppType::Copilot => {
+            unreachable!("additive mode / no-live-file apps are handled by early return")
         }
     };
 

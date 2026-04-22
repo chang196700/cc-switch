@@ -470,6 +470,10 @@ impl ProxyService {
                 // These apps don't support proxy features
                 return Err("该应用不支持代理功能".to_string());
             }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features
+                return Err("Copilot CLI 不支持代理功能".to_string());
+            }
         };
 
         self.sync_live_config_to_provider(app_type, &live_config)
@@ -686,6 +690,9 @@ impl ProxyService {
             AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => {
                 // These apps don't support proxy features, skip silently
             }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features, skip silently
+            }
         }
 
         Ok(())
@@ -868,6 +875,10 @@ impl ProxyService {
                 // These apps don't support proxy features
                 return Err("该应用不支持代理功能".to_string());
             }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features
+                return Err("Copilot CLI 不支持代理功能".to_string());
+            }
         };
 
         let json_str = serde_json::to_string(&config)
@@ -1012,6 +1023,10 @@ impl ProxyService {
                 // These apps don't support proxy features
                 return Err("该应用不支持代理功能".to_string());
             }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features
+                return Err("Copilot CLI 不支持代理功能".to_string());
+            }
         }
 
         Ok(())
@@ -1064,6 +1079,9 @@ impl ProxyService {
             AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => {
                 // These apps don't support proxy features, skip silently
             }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features, skip silently
+            }
         }
 
         Ok(())
@@ -1103,6 +1121,9 @@ impl ProxyService {
             }
             AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => {
                 // These apps don't support proxy features, skip silently
+            }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features, skip silently
             }
         }
 
@@ -1196,6 +1217,10 @@ impl ProxyService {
                 // These apps don't support proxy features
                 Err("该应用不支持代理功能".to_string())
             }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features
+                Err("Copilot CLI 不支持代理功能".to_string())
+            }
         }
     }
 
@@ -1215,6 +1240,10 @@ impl ProxyService {
             },
             AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => {
                 // These apps don't support proxy takeover
+                false
+            }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy takeover
                 false
             }
         }
@@ -1258,6 +1287,10 @@ impl ProxyService {
             AppType::Gemini => self.cleanup_gemini_takeover_placeholders_in_live(),
             AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => {
                 // These apps don't support proxy features
+                Ok(())
+            }
+            AppType::Copilot => {
+                // Copilot CLI doesn't support proxy features
                 Ok(())
             }
         }
@@ -1507,7 +1540,7 @@ impl ProxyService {
                 serde_json::to_string(&env_backup)
                     .map_err(|e| format!("序列化 Gemini 配置失败: {e}"))?
             }
-            AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => {
+            AppType::OpenCode | AppType::OpenClaw | AppType::Hermes | AppType::Copilot => {
                 return Err(format!("未知的应用类型: {app_type}"));
             }
         };

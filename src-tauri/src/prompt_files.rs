@@ -17,6 +17,13 @@ pub fn prompt_file_path(app: &AppType) -> Result<PathBuf, AppError> {
         AppType::OpenCode => get_opencode_dir(),
         AppType::OpenClaw => get_openclaw_dir(),
         AppType::Hermes => crate::hermes_config::get_hermes_dir(),
+        AppType::Copilot => {
+            return Err(AppError::localized(
+                "copilot_no_prompt_file",
+                "Copilot CLI 不支持提示词文件",
+                "Copilot CLI does not support prompt files",
+            ))
+        }
     };
 
     let filename = match app {
@@ -24,6 +31,7 @@ pub fn prompt_file_path(app: &AppType) -> Result<PathBuf, AppError> {
         AppType::Codex => "AGENTS.md",
         AppType::Gemini => "GEMINI.md",
         AppType::OpenCode | AppType::OpenClaw | AppType::Hermes => "AGENTS.md",
+        AppType::Copilot => unreachable!("Copilot CLI does not support prompt files"),
     };
 
     Ok(base_dir.join(filename))

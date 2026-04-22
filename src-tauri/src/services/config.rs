@@ -133,6 +133,9 @@ impl ConfigService {
             AppType::Hermes => {
                 // Hermes uses additive mode, no live sync needed
             }
+            AppType::Copilot => {
+                // Copilot CLI uses env vars, no live sync needed
+            }
         }
 
         Ok(())
